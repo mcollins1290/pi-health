@@ -9,7 +9,7 @@ import digitalio
 import adafruit_character_lcd.character_lcd as characterlcd
 
 # --------- User Settings ---------
-# Set the time between checks
+# Set the number of minutes between checks
 MINUTES_BETWEEN_READS = 1
 # Set the number of seconds between Messages
 SECONDS_BETWEEN_MSGS = 3
@@ -134,7 +134,17 @@ def main():
 			time.sleep(SECONDS_BETWEEN_MSGS)
 			lcd.clear()
 
-			time.sleep(60*MINUTES_BETWEEN_READS)
+			wait_time = 60*MINUTES_BETWEEN_READS
+
+			while wait_time:
+				mins, secs = divmod(wait_time, 60)
+				timeformat = '{:02d}:{:02d}'.format(mins, secs)
+				msg = "Next status in: " + timeformat
+				print(msg, end='\r')
+				lcd.message = msg
+				time.sleep(1)
+				wait_time -= 1
+
 	except KeyboardInterrupt:
         	print("Keyboard Interrupt detected. Exiting...")
         	lcd.clear()
