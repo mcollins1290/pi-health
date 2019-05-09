@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import division
 from subprocess import PIPE, Popen
+from datetime import datetime
 import sys
 import psutil
 import time
@@ -46,9 +47,20 @@ def get_cpu_temperature():
 
 def main():
 	try:
-		lcd.clear()
 		while True:
+			#BEGIN INTRO MESSAGE
+			lcd.clear()
+			date_time = datetime.now().strftime('%b %d  %H:%M:%S\n')
+			msg = "Pi Status as of:\n" + date_time
+			print(msg)
+			lcd.message = msg
+
+			#END INTRO MESSAGE
+
+			time.sleep(SECONDS_BETWEEN_MSGS)
+
 			#BEGIN CPU TEMP
+			lcd.clear()
 			cpu_temperature = get_cpu_temperature()
 			msg = "CPU Temperature:\n"
 			if METRIC_UNITS:
@@ -132,18 +144,23 @@ def main():
 			### END MEMORY STATS
 
 			time.sleep(SECONDS_BETWEEN_MSGS)
-			lcd.clear()
 
-			wait_time = 60*MINUTES_BETWEEN_READS
+			if MINUTES_BETWEEN_READS > 0:
 
-			while wait_time:
-				mins, secs = divmod(wait_time, 60)
-				timeformat = '{:02d}:{:02d}'.format(mins, secs)
-				msg = "Next status in: " + timeformat
-				print(msg, end='\r')
-				lcd.message = msg
-				time.sleep(1)
-				wait_time -= 1
+				wait_time = 60*MINUTES_BETWEEN_READS
+
+				while wait_time:
+					mins, secs = divmod(wait_time, 60)
+					timeformat = '{:02d}:{:02d}'.format(mins, secs)
+					msg_prefix = "Next status in: "
+					msg_suffix = " (MM:SS)"
+					console_msg = msg_prefix + timeformat + msg_suffix
+					lcd_msg = msg_prefix + '\n' + timeformat + msg_suffix
+					print(console_msg, end='\r')
+					lcd.message = lcd_msg
+					time.sleep(1)
+					wait_time -= 1
+			print("\n")
 
 	except KeyboardInterrupt:
         	print("Keyboard Interrupt detected. Exiting...")
